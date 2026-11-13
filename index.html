@@ -107,6 +107,25 @@ ul.plain{margin:0;padding-left:18px;color:var(--ink)}
 .note{font-size:.8125rem;color:var(--slate)}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:slide .2s cubic-bezier(.4,.1,.2,1)}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
 [hidden]{display:none!important}
+/* Verdienst-Ticker */
+.vd{background:linear-gradient(180deg,#24303a 0%,#1a232b 100%);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--sh-2);padding:22px;color:#eef3f7;display:flex;flex-direction:column;gap:6px}
+.vd h2{color:rgba(238,243,247,.72)}
+.vd-kopf{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.vd-stand{font-size:.75rem;color:rgba(238,243,247,.6)}
+.vd-zahl{font-family:var(--serif);font-size:clamp(2.2rem,1.6rem + 2vw,3rem);font-weight:600;line-height:1.05;color:#fff;font-variant-numeric:tabular-nums}
+.vd-sub{color:rgba(238,243,247,.75)}
+.vd-sub b,.vd-fuss b{color:#fff;font-weight:600}
+.vd-spur{height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;margin:8px 0 4px}
+.vd-spur i{display:block;height:100%;border-radius:inherit;background:var(--accent)}
+.vd-fuss{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.8125rem;color:rgba(238,243,247,.7)}
+.vd details{margin-top:8px;border-top:1px solid rgba(255,255,255,.12);padding-top:8px}
+.vd summary{cursor:pointer;font-weight:600;font-size:.8125rem;color:#fff}
+.vd ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.vd li{display:grid;grid-template-columns:3.2rem 1fr auto;gap:10px;font-size:.8125rem;padding:2px 0}
+.vd li .tt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vd li.kommt{color:rgba(238,243,247,.6)}
+.vd form{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.vd input{flex:1;min-width:200px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:8px;padding:9px 12px}
 .lock{min-height:100vh;display:grid;place-items:center;padding:16px}
 .lock form{width:min(380px,100%)}
 .lock input[type=password]{width:100%;border:1.5px solid var(--hair);border-radius:8px;padding:10px 13px;background:var(--white);color:var(--ink);margin-top:4px}
@@ -130,6 +149,8 @@ body.locked .wrap{display:none} body:not(.locked) .lock{display:none}
     </div>
     <p class="state" id="state">Lädt …</p>
   </header>
+
+  <section class="vd" id="verdienst" aria-live="polite"><div class="vd-kopf"><h2>Dein Verdienst</h2></div><p class="vd-sub">Lädt …</p></section>
 
   <section class="grid2">
     <div class="panel">
@@ -266,7 +287,38 @@ const DONE=()=>LS.get("mc-done",{});
 function starte(d){S.mentees=d.mentees;S.termine=d.termine;
   const dn=DONE();S.punkte=d.punkte.map(p=>p.id in dn?{...p,erledigt:dn[p.id].erledigt}:p);
   S.auftraege=LS.get("mc-auftraege",[]);
-  $("state").textContent="Stand "+fmt(d.stand);document.body.classList.remove("locked");renderAll()}
+  $("state").textContent="Stand "+fmt(d.stand);document.body.classList.remove("locked");renderAll();ladeVerdienst()}
+
+/* ---------- Verdienst-Ticker: live aus dem Kalender über das Mentee-Bereich-Script ----------
+   Nur mit Annes persönlichem Code (Status „Team“); Mentees bekommen diese Zahlen nie. */
+const VD_API="https://script.google.com/macros/s/AKfycbyXyMPS_TaaBA6s7XjQR4d8v_R8O1ezR27FNddf-8Yv_HlY_t87kK1DSVLuCTezubIK/exec";
+(()=>{const u=new URL(location.href);const z=(u.searchParams.get("z")||"").trim().toUpperCase();
+  if(z){LS.set("mc-tet-code",z);u.searchParams.delete("z");history.replaceState(null,"",u)}})();
+const euro=n=>n.toLocaleString("de-DE",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2})+" €";
+function vdCodeForm(msg){$("verdienst").innerHTML=`<div class="vd-kopf"><h2>Dein Verdienst</h2></div>
+  <p class="vd-sub">${msg}</p><form id="vdForm"><input id="vdCode" placeholder="Dein persönlicher Link aus dem Mentee-Bereich" autocomplete="off"><button class="btn">Speichern</button></form>`;
+  $("vdForm").addEventListener("submit",e=>{e.preventDefault();const v=$("vdCode").value.trim();const m=v.match(/z=([A-Z0-9]+)/i);
+    LS.set("mc-tet-code",(m?m[1]:v).toUpperCase());ladeVerdienst()})}
+async function ladeVerdienst(){
+  const code=LS.get("mc-tet-code","");
+  if(!code)return vdCodeForm("Einmalig: Füge hier deinen persönlichen Mentee-Bereich-Link ein, dann siehst du deinen Verdienst live.");
+  const alt=LS.get("mc-verdienst",null);if(alt)zeigeVerdienst(alt);
+  try{const r=await fetch(VD_API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({code,aktion:"verdienst"})});
+    const d=await r.json();
+    if(!d.ok){if(/nur f/i.test(d.fehler||"")||/gültig/i.test(d.fehler||"")){LS.del("mc-tet-code");return vdCodeForm("Der Code passt nicht. Bitte deinen eigenen Link aus dem Mentee-Bereich einfügen.")}throw 0}
+    if(!d.verdienst){if(!alt)$("verdienst").querySelector(".vd-sub").textContent="Fast fertig: Das Google-Script muss noch einmal aktualisiert werden (neue Version bereitstellen).";return}
+    LS.set("mc-verdienst",d.verdienst);zeigeVerdienst(d.verdienst)}
+  catch(e){if(!alt)$("verdienst").querySelector(".vd-sub").textContent="Der Verdienst konnte gerade nicht geladen werden."}}
+function zeigeVerdienst(v){const erw=v.verdient+v.geplant;const ant=erw?Math.round(v.verdient/erw*100):0;const a=v.anzahl||{};
+  const teile=[a.einzel?a.einzel+"× 1:1":"",a.gruppe?a.gruppe+"× Gruppencall":"",a.geteilt?a.geteilt+"× Social Media Call (geteilt)":""].filter(Boolean).join(" · ");
+  const liste=(v.termine||[]).map(t=>{const d=new Date(t.start);return`<li class="${t.vorbei?"ist":"kommt"}"><span>${d.getDate()}.${d.getMonth()+1}.</span><span class="tt">${esc(t.titel)}</span><b>${euro(t.euro)}</b></li>`}).join("");
+  const st=new Date(v.stand);
+  $("verdienst").innerHTML=`<div class="vd-kopf"><h2>Dein Verdienst · ${esc(v.monat)}</h2><span class="vd-stand">Stand ${st.getHours()}:${String(st.getMinutes()).padStart(2,"0")} Uhr</span></div>
+  <div class="vd-zahl">${euro(v.verdient)}</div>
+  <div class="vd-sub">verdient bisher${v.geplant?` · <b>+ ${euro(v.geplant)}</b> schon gebucht → <b>${euro(erw)}</b> erwartet`:""}</div>
+  <div class="vd-spur"><i style="width:${ant}%"></i></div>
+  <div class="vd-fuss"><span>${teile||"Noch keine bezahlten Termine in diesem Monat."}</span><span>${esc(v.vormonat)}: <b>${euro(v.vormonatSumme)}</b></span></div>
+  ${liste?`<details><summary>Alle Termine im ${esc(v.monat)}</summary><ul>${liste}</ul></details>`:""}`}
 $("lockForm").addEventListener("submit",async e=>{e.preventDefault();$("lockBtn").disabled=true;$("lockMsg").textContent="Öffnet …";
   try{const key=await keyAusPw($("pw").value);const d=await entschluesseln(key);
     if($("remember").checked)LS.set("mc-key",{salt:ENC.salt,k:ub64(await crypto.subtle.exportKey("raw",key))});starte(d)}
