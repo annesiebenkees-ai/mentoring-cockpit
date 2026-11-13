@@ -1,0 +1,106 @@
+/* =====================================================================
+   Mentoring-Cockpit im TET-Design „Milchglas“ (seit 28.10.2026)
+   Wird NACH dem eingebauten Stil geladen und überschreibt ihn – index.html
+   braucht dafür nur <link rel="stylesheet" href="milchglas.css"> (verdienst.js
+   ergänzt den Link notfalls selbst). Nur Manrope, kein Kursiv/Serif/Orange,
+   Lime nur für die eine Haupthandlung („Auftrag ablegen“).
+   ===================================================================== */
+@font-face{ font-family:"Manrope"; src:url("milchglas/manrope.ttf") format("truetype"); font-weight:200 800; font-style:normal; font-display:swap; }
+
+:root{
+  --mg-grund:#ECEAF4;
+  --mg-glas:linear-gradient(140deg,rgba(255,255,255,.74),rgba(255,255,255,.52));
+  --mg-glas-stark:linear-gradient(140deg,rgba(255,255,255,.92),rgba(255,255,255,.72));
+  --mg-glas-linie:rgba(255,255,255,.85);
+  --mg-glas-schatten:inset 0 1px 0 rgba(255,255,255,.95),0 18px 48px rgba(70,60,140,.10);
+  --mg-glas-schatten-stark:inset 0 1px 0 rgba(255,255,255,.95),0 28px 70px rgba(70,60,140,.18);
+  --mg-unschaerfe:blur(26px) saturate(165%);
+  --mg-dunkel:linear-gradient(180deg,#2A2636 0%,#18161F 34%,#111018 100%); --mg-dunkel-linie:rgba(255,255,255,.20);
+  --mg-weich:rgba(22,20,31,.06); --mg-weich-stark:rgba(22,20,31,.10);
+  --mg-text:#16141F; --mg-text-leise:#5B5770; --mg-text-auftakt:#8A86A0;
+  --mg-text-auf-dunkel:#ECEAF4; --mg-text-auf-dunkel-leise:rgba(236,234,244,.70);
+  --mg-linie:rgba(22,20,31,.10); --mg-linie-leicht:rgba(22,20,31,.06);
+  --mg-feld-rand:rgba(22,20,31,.12); --mg-feld-rand-hover:rgba(22,20,31,.22);
+  --mg-akzent:#D7F25A; --mg-akzent-knopf:linear-gradient(180deg,#E8FA8C 0%,#D7F25A 52%,#C4E13A 100%);
+  --mg-licht-lavendel:rgba(201,195,230,1); --mg-licht-violett:rgba(123,116,242,.30); --mg-licht-lime:rgba(215,242,90,.50);
+  --mg-gefahr:#B42318; --mg-gefahr-grund:#F8D7D3; --mg-ok:#2F7D4A; --mg-ok-grund:#DCEFD9; --mg-laeuft-grund:rgba(201,195,230,.55);
+  --mg-fokus:#16141F; --mg-fokus-ring:rgba(22,20,31,.18);
+  /* alte Namen neu belegt */
+  --water:var(--mg-laeuft-grund); --deep:var(--mg-feld-rand-hover); --tint:var(--mg-weich); --paper:rgba(255,255,255,.85); --white:#fff;
+  --slate:var(--mg-text-leise); --ink:var(--mg-text); --body:var(--mg-text);
+  --accent:var(--mg-text); --accent-deep:var(--mg-gefahr); --accent-tint:var(--mg-gefahr-grund); --accent-soft:rgba(248,215,211,.55);
+  --hair:var(--mg-linie); --focus-ring:var(--mg-fokus-ring); --ok:var(--mg-ok); --ok-tint:var(--mg-ok-grund); --run-tint:var(--mg-laeuft-grund); --run:var(--mg-text);
+  --serif:"Manrope",system-ui,sans-serif; --sans:"Manrope",system-ui,sans-serif; --mono:"Manrope",system-ui,sans-serif;
+  --sh-1:0 1px 2px rgba(70,60,140,.05),0 6px 18px rgba(70,60,140,.06); --sh-2:var(--mg-glas-schatten); --sh-3:var(--mg-glas-schatten-stark);
+}
+
+/* Grund mit Licht */
+html{ background:var(--mg-grund); }
+body{ background:transparent; color:var(--mg-text); font-family:"Manrope",system-ui,sans-serif; font-weight:500; }
+body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; background:
+  radial-gradient(70vmax 70vmax at -10% -20%,var(--mg-licht-lavendel),transparent 60%),
+  radial-gradient(55vmax 55vmax at 110% 30%,var(--mg-licht-violett),transparent 62%),
+  radial-gradient(60vmax 60vmax at 40% 130%,var(--mg-licht-lime),transparent 62%), var(--mg-grund); }
+::selection{ background:rgba(215,242,90,.55); color:var(--mg-text); }
+:focus-visible{ box-shadow:0 0 0 2px #fff,0 0 0 4px var(--mg-fokus); }
+em,i{ font-style:normal; }
+
+/* Schrift */
+h1{ font-weight:700; letter-spacing:-.028em; line-height:1.07; font-size:clamp(1.75rem,1.2vw + 1.25rem,2.5rem); color:var(--mg-text-auftakt); }
+h1 em{ color:var(--mg-text); font-style:normal; }
+h2{ font-weight:700; font-size:13px; letter-spacing:.08em; color:var(--mg-text-leise); }
+h2::before{ display:none; }
+h3{ font-weight:700; letter-spacing:-.02em; }
+.top .sub{ color:var(--mg-text-leise); }
+.top > div::before{ content:""; display:block; width:148px; height:30px; margin-bottom:18px; background:url("milchglas/tet-logo-hell.svg") no-repeat left center/contain; }
+.lock form h1::before{ content:""; display:block; width:148px; height:30px; margin-bottom:14px; background:url("milchglas/tet-logo-hell.svg") no-repeat left center/contain; }
+.state,.count,.todo .due,.cfoot{ font-weight:600; letter-spacing:.02em; }
+.state{ text-transform:none; font-size:.8125rem; }
+
+/* Glasflächen */
+.panel,.card,.facts{ background:var(--mg-glas); border:1px solid var(--mg-glas-linie); border-radius:24px; box-shadow:var(--mg-glas-schatten);
+  -webkit-backdrop-filter:var(--mg-unschaerfe); backdrop-filter:var(--mg-unschaerfe); }
+.facts{ border-radius:14px; }
+.card:hover{ background:var(--mg-glas-stark); border-color:var(--mg-glas-linie); box-shadow:var(--mg-glas-schatten-stark); transform:none; }
+.card .nm{ font-weight:700; letter-spacing:-.02em; }
+.card .am,.facts dt,.hint .k{ font-weight:700; font-size:11px; letter-spacing:.08em; }
+.todo,.auftrag,.cfoot{ border-top-style:solid; border-top-color:var(--mg-linie-leicht); }
+.hint{ border-radius:14px; background:var(--mg-weich); }
+.hint.warn{ background:var(--mg-laeuft-grund); } .hint.crit{ background:var(--mg-gefahr-grund); }
+.hint.warn .k{ color:var(--mg-text); } .hint.crit .k{ color:var(--mg-gefahr); }
+.todo input{ accent-color:var(--mg-text); }
+
+/* Knöpfe & Felder */
+.btn{ border-radius:999px; min-height:40px; padding:10px 20px; font-weight:700; color:var(--mg-text); background:var(--mg-akzent-knopf); box-shadow:0 8px 20px rgba(120,140,30,.22); }
+.lock .btn{ background:var(--mg-text); color:var(--mg-text-auf-dunkel); box-shadow:none; }
+.ghost{ border:0; background:var(--mg-weich); border-radius:999px; min-height:34px; font-weight:600; color:var(--mg-text-leise); }
+.ghost:hover{ background:var(--mg-weich-stark); color:var(--mg-text); }
+.ghost[aria-pressed="true"]{ background:var(--mg-text); color:var(--mg-text-auf-dunkel); font-weight:700; }
+.ask textarea,.ask select,.filters input,.lock input[type=password]{ border:1px solid var(--mg-feld-rand); border-radius:14px; background:rgba(255,255,255,.85); }
+.filters input{ border-radius:999px; }
+.ask textarea:hover,.ask select:hover,.filters input:hover{ border-color:var(--mg-feld-rand-hover); }
+.ask textarea:focus,.ask select:focus,.filters input:focus,.lock input[type=password]:focus{ border-color:var(--mg-fokus); box-shadow:0 0 0 3px var(--mg-fokus-ring); }
+
+/* Pillen & Balken */
+.pill{ text-transform:none; letter-spacing:0; font-size:.75rem; font-weight:600; background:var(--mg-weich); color:var(--mg-text); }
+.pill.ok{ background:var(--mg-ok-grund); color:var(--mg-ok); }
+.pill.warn,.pill.crit{ background:var(--mg-gefahr-grund); color:var(--mg-gefahr); }
+.pill.camel{ background:var(--mg-laeuft-grund); color:var(--mg-text); }
+.bar{ height:6px; background:rgba(22,20,31,.08); } .bar i{ background:var(--mg-akzent); }
+.bar.warn i,.bar.crit i{ background:var(--mg-gefahr); }
+
+/* Seitenfenster (Mentee-Details) */
+.scrim{ background:rgba(22,20,31,.32); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+.sheet{ background:linear-gradient(140deg,#FBFAFE,#F1EFF8); border-left:0; border-radius:28px 0 0 28px; box-shadow:var(--mg-glas-schatten-stark); }
+.sheet h3.big{ font-weight:700; letter-spacing:-.028em; }
+.termin{ border-left:2px solid var(--mg-akzent); }
+a{ color:var(--mg-text); text-decoration-color:var(--mg-feld-rand-hover); }
+.mlink{ text-decoration-color:var(--mg-feld-rand-hover); } .mlink:hover{ text-decoration-color:var(--mg-text); }
+.auftrag .antwort{ border-radius:14px; }
+
+/* Handy */
+@media (max-width:880px),(pointer:coarse){ .btn,.ghost{ min-height:44px; } }
+@media (max-width:374px){ .top > div::before,.lock form h1::before{ width:32px; height:32px; background-image:url("milchglas/tet-zeichen-hell.svg"); } }
+@media (prefers-reduced-transparency:reduce){
+  .panel,.card,.facts,.scrim{ -webkit-backdrop-filter:none; backdrop-filter:none; } .panel,.card,.facts{ background:var(--mg-grund); }
+}
